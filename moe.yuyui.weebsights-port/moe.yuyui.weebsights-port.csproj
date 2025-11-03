@@ -10,5 +10,14 @@
     <ItemGroup>
       <PackageReference Include="SPTarkov.Server.Core" Version="4.0.3" />
     </ItemGroup>
-
+    <ItemGroup>
+        <Content Include="bundles\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Update="bundles.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>
