@@ -4,15 +4,17 @@ using moe.yuyui.weebsights_port.Interfaces;
 using moe.yuyui.weebsights_port.Models;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
+using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Services.Mod;
 
 namespace moe.yuyui.weebsights_port.Items;
 
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
-public class ItemGenerator(ISptLogger<ItemGenerator> logger, CustomItemService customItemService)
+public class ItemGenerator(ISptLogger<ItemGenerator> logger, CustomItemService customItemService, DatabaseService databaseService)
 {
     public IEnumerable<CreateItemResult> GenerateWeebSights<T>() where T : IWeebSightEnum
     {
@@ -61,7 +63,34 @@ public class ItemGenerator(ISptLogger<ItemGenerator> logger, CustomItemService c
                 itemCreation.Errors?.ForEach(e => logger.Critical("[Weeb Iron Sights] " + e));
                 continue;
             }
+            AddItemToFilters(sight);
             yield return itemCreation;
+        }
+    }
+
+    private void AddItemToFilters(WeebSight sight)
+    {
+        var itemsWithSlots = databaseService.GetTemplates().Items.Where(i => i.Value.Properties?.Slots?.Count() > 0);
+        foreach (var item in itemsWithSlots)
+        {
+            var backIronSightSlot = item.Value.Properties?.Slots?.FirstOrDefault(s => s.Name == "mod_sight_rear");
+            if (backIronSightSlot == null)
+            {
+                continue;
+            }
+
+            var slotFilter = backIronSightSlot?.Properties?.Filters?.FirstOrDefault(f => f.Filter?.Contains(sight.CloneFromTpl) ?? false);
+            if (slotFilter == null)
+            {
+                continue;
+            }
+
+            if (slotFilter.Filter?.Add(sight.Id) is false)
+            {
+                logger.Error("[Weeb Iron Sights] Failed to add filter to item " + item.Key);
+                continue;
+            }
+            logger.Success($"[Weeb Iron Sights] Added {sight.Id} to filter on item {item.Key}");
         }
     }
 }
