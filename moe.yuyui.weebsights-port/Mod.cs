@@ -1,12 +1,15 @@
-﻿using moe.yuyui.weebsights_port.Locales;
+﻿using moe.yuyui.weebsights_port.Assorts;
+using moe.yuyui.weebsights_port.Enums;
+using moe.yuyui.weebsights_port.Items;
+using moe.yuyui.weebsights_port.Locales;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Utils;
 
 namespace moe.yuyui.weebsights_port;
 
-[Injectable(TypePriority = OnLoadOrder.PostSptModLoader)]
-public class Mod(ISptLogger<Mod> logger, EnglishLocale englishLocale): IOnLoad
+[Injectable(TypePriority = OnLoadOrder.PostSptModLoader + 1)]
+public class Mod(ISptLogger<Mod> logger, EnglishLocale englishLocale, MechanicAssort mechanicAssort, ItemGenerator itemGenerator): IOnLoad
 {
     public Task OnLoad()
     {
@@ -14,7 +17,18 @@ public class Mod(ISptLogger<Mod> logger, EnglishLocale englishLocale): IOnLoad
         {
             logger.Error("[Weeb Iron Sights] Failed to load locales, you may see garbled text");
         }
-        logger.Success("[Weeb Iron Sights] Items loaded successfully");
+
+        var sightsMbus = itemGenerator.GenerateWeebSights<ESightsMbus>();
+        var sightsMcx = itemGenerator.GenerateWeebSights<ESightsMcx>();
+        if (!mechanicAssort.InjectAssortFromItemClone(sightsMbus))
+        {
+            logger.Critical("[Weeb Iron Sights] Failed to inject MBUS Sights");
+        }
+
+        if (!mechanicAssort.InjectAssortFromItemClone(sightsMcx))
+        {
+            logger.Critical("[Weeb Iron Sights] Failed to inject MCX Sights");
+        }
         return Task.CompletedTask;
     }
 }
