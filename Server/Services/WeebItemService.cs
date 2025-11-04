@@ -1,16 +1,15 @@
-using moe.yuyui.weebsights_port.Models;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Services.Mod;
 using SPTarkov.Server.Core.Utils;
+using WeebSights.Models;
 
-namespace moe.yuyui.weebsights_port.Services;
+namespace WeebSights.Services;
 
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 3)]
 public class WeebItemService(ISptLogger<WeebItemService> logger, JsonUtil jsonUtil, CustomItemService  customItemService, DatabaseService databaseService)

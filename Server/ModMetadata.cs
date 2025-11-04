@@ -1,6 +1,6 @@
 using SPTarkov.Server.Core.Models.Spt.Mod;
 
-namespace moe.yuyui.weebsights_port;
+namespace WeebSights;
 
 public record ModMetadata : AbstractModMetadata
 {
@@ -16,5 +16,5 @@ public record ModMetadata : AbstractModMetadata
     public override string? Url { get; init; }
     public override bool? IsBundleMod { get; init; } = true;
     public override string? License { get; init; } = "MIT";
-    public override string ModGuid { get; init; } = "moe.yuyui.weebsights-port";
+    public override string ModGuid { get; init; } = "moe.yuyui.animesights-port";
 }

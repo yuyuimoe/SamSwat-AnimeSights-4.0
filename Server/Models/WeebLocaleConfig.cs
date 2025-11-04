@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Common;
 
-namespace moe.yuyui.weebsights_port.Models;
+namespace WeebSights.Models;
 
 public record WeebLocaleConfig()
 {

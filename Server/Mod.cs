@@ -1,13 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using moe.yuyui.weebsights_port.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
+using WeebSights.Services;
 
-namespace moe.yuyui.weebsights_port;
+namespace WeebSights;
 
 [Injectable(TypePriority = OnLoadOrder.PostSptModLoader + 1)]
 public class Mod(ISptLogger<Mod> logger,

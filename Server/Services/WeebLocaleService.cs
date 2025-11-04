@@ -1,10 +1,10 @@
-using moe.yuyui.weebsights_port.Models;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Utils;
+using WeebSights.Models;
 
-namespace moe.yuyui.weebsights_port.Services;
+namespace WeebSights.Services;
 
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 4)]
 public class WeebLocaleService(JsonUtil jsonUtil)

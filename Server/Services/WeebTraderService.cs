@@ -8,7 +8,7 @@ using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 
-namespace moe.yuyui.weebsights_port.Services;
+namespace WeebSights.Services;
 
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
 public class WeebTraderService(ISptLogger<WeebTraderService> logger, DatabaseService databaseService)
