@@ -1,7 +1,3 @@
-using System.Reflection;
-using Microsoft.Extensions.Logging;
-using moe.yuyui.weebsights_port.Enums;
-using moe.yuyui.weebsights_port.Models;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Extensions;
@@ -10,24 +6,21 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
-using SPTarkov.Server.Core.Services.Mod;
-using SPTarkov.Server.Core.Utils;
 
-namespace moe.yuyui.weebsights_port.Assorts;
+namespace moe.yuyui.weebsights_port.Services;
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]
-public class MechanicAssort(ISptLogger<MechanicAssort>logger, JsonUtil jsonUtil, DatabaseService databaseService, CustomItemService customItemService)
+[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
+public class WeebTraderService(ISptLogger<WeebTraderService> logger, DatabaseService databaseService)
 {
-    public bool InjectAssortFromItemClone(IEnumerable<CreateItemResult> itemCloneResults)
+    public bool AddToAssortFromItemClone(MongoId traderId, IEnumerable<CreateItemResult> itemCloneResults)
     {
-        if (!databaseService.GetTables().Traders.TryGetValue(Traders.MECHANIC, out var mechanic))
+        if (!databaseService.GetTables().Traders.TryGetValue(traderId, out var trader))
         {
-            logger.Error("[Weeb Iron Sights] Failed to find MECHANIC trader");
+            logger.Error($"[Weeb Iron Sights] Failed to find trader with ID {traderId}");
             return false;
         }
-
+        
         foreach (var itemResult in itemCloneResults)
         {
             var item = databaseService.GetItems().FirstOrDefault(i => i.Key ==  itemResult.ItemId);
@@ -38,8 +31,8 @@ public class MechanicAssort(ISptLogger<MechanicAssort>logger, JsonUtil jsonUtil,
                 Template = CurrencyType.RUB.GetCurrencyTpl()
             };
             
-            mechanic.Assort.Items.Add(traderItem);
-            if (!mechanic.Assort.BarterScheme.TryAdd(item.Key, [[traderBarter]]))
+            trader.Assort.Items.Add(traderItem);
+            if (!trader.Assort.BarterScheme.TryAdd(item.Key, [[traderBarter]]))
             {
                 logger.Error($"[Weeb Iron Sights] Failed to add barter for item {item.Value.Name} with ID {item.Value.Id} in MECHANIC");
             }

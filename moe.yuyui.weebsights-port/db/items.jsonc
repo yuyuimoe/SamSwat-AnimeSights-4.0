@@ -1,0 +1,143 @@
+[
+  {
+    "id": "6753d006cec7fc449f055445",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_anti.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f05544a",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_anti2.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+  "id": "6753d006cec7fc449f055450",
+  "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+  "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_fde_anti.bundle",
+  "price": 4000,
+  "ergonomics": 3
+  },  
+  {
+    "id": "6753d006cec7fc449f055451",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_fde_anti2.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },  
+  {
+    "id": "6753d006cec7fc449f055446",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_anime.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },  
+  {
+    "id": "6753d006cec7fc449f055447",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_anime2.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f05544d",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_fde_anime2.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055448",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_anime3.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f05544e",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_fde_anime3.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055449",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_anime3v2.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f05544f",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_fde_anime3v2.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f05544b",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_ramrem.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055452",
+    "clone_from_tpl": "5bc09a18d4351e003562b68e", //IRONSIGHT_MAGPUL_MBUS_GEN2_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_magpul_mbus_gen2_fde_ramrem.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055453",
+    "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anime.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055454",
+    "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anime2.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055455",
+    "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anime3.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055456",
+    "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anime3v2.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055457",
+    "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anti.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055458",
+    "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anti2.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  },
+  {
+    "id": "6753d006cec7fc449f055459",
+    "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
+    "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_ramrem.bundle",
+    "price": 4000,
+    "ergonomics": 3
+  }
+  
+]
