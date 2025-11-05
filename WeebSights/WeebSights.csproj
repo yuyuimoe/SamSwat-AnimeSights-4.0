@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <RootNamespace>WeebSights</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>WeebSights</AssemblyName>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <FileVersion>1.0.0</FileVersion>
+    </PropertyGroup>
+    
+    
+    <ItemGroup>
+      <PackageReference Include="SPTarkov.Server.Core" Version="4.0.3" />
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="bundles\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="WeebSights.csproj.user" />
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="bundles.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="db\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')" />
+    <PropertyGroup>
+        <ModsDirectoryPath>$(SPTPath)user/mods/$(MSBuildProjectName)</ModsDirectoryPath>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugType>none</DebugType>
+        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </PropertyGroup>
+
+    <Target Name="CopyToSPT" AfterTargets="AfterBuild" Condition="'$(SPTPath)' != ''">
+        <Message Importance="high" Text="Copying mods to $(ModsDirectoryPath)" />
+        <Delete Files="$(OutputPath)/$(MSBuildProjectName).deps.json" />
+        <ItemGroup>
+            <FilesToCopy Include="$(OutputPath)/**" />
+        </ItemGroup>
+        <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ModsDirectoryPath)\%(RecursiveDir)" ContinueOnError="false" />
+        <Message Text="Files copied" />
+    </Target>
+    
+    <Target Name="MakeZIPFile" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+        <ItemGroup>
+            <FilesToMove Include="$(OutputPath)/**"/>
+        </ItemGroup>
+        <PropertyGroup>
+            <FolderToMove>$(OutputPath)../package/SPT/user/mods/$(MSBuildProjectName)</FolderToMove>
+        </PropertyGroup>
+        <Message Importance="high" Text="Making zip file for redistribution" />
+        <MakeDir Directories="$(FolderToMove)"/>
+        <Move SourceFiles="@(FilesToMove)" DestinationFolder="$(FolderToMove)\%(RecursiveDir)" />
+        <ZipDirectory DestinationFile="$(OutputPath)../$(MSBuildProjectName)-$(AssemblyVersion)" SourceDirectory="$(OutputPath)../package/" />
+    </Target>
+</Project>

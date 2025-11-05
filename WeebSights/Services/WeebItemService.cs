@@ -53,8 +53,10 @@ public class WeebItemService(ISptLogger<WeebItemService> logger, JsonUtil jsonUt
             {
                 logger.Error("[Weeb Iron Sights] Failed to add filter to item " + item.Key);
                 continue;
-            }
+            } 
+#if DEBUG
             logger.Success($"[Weeb Iron Sights] Added {sight.Id} to filter on item {item.Key}");
+#endif
         }
     }
     
