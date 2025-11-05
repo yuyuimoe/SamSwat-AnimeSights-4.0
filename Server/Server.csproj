@@ -5,6 +5,7 @@
         <RootNamespace>WeebSights</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>WeebSights</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,7 +17,7 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
-        <Content Update="bundles.json">
+        <Content Include="bundles.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
