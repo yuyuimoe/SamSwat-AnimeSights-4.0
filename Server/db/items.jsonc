@@ -94,50 +94,50 @@
     "id": "6753d006cec7fc449f055453",
     "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
     "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anime.bundle",
-    "price": 4000,
-    "ergonomics": 3
+    "price": 2500,
+    "ergonomics": 2
   },
   {
     "id": "6753d006cec7fc449f055454",
     "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
     "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anime2.bundle",
-    "price": 4000,
-    "ergonomics": 3
+    "price": 2500,
+    "ergonomics": 2
   },
   {
     "id": "6753d006cec7fc449f055455",
     "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
     "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anime3.bundle",
-    "price": 4000,
-    "ergonomics": 3
+    "price": 2500,
+    "ergonomics": 2
   },
   {
     "id": "6753d006cec7fc449f055456",
     "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
     "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anime3v2.bundle",
-    "price": 4000,
-    "ergonomics": 3
+    "price": 2500,
+    "ergonomics": 2
   },
   {
     "id": "6753d006cec7fc449f055457",
     "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
     "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anti.bundle",
-    "price": 4000,
-    "ergonomics": 3
+    "price": 2500,
+    "ergonomics": 2
   },
   {
     "id": "6753d006cec7fc449f055458",
     "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
     "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_anti2.bundle",
-    "price": 4000,
-    "ergonomics": 3
+    "price": 2500,
+    "ergonomics": 2
   },
   {
     "id": "6753d006cec7fc449f055459",
     "clone_from_tpl": "5fc0fa957283c4046c58147e", //IRONSIGHT_MCX_FLIPUP_REAR_SIGHT
     "bundle_path": "assets/content/items/mods/sights rear/sight_rear_all_sig_flip_up_ramrem.bundle",
-    "price": 4000,
-    "ergonomics": 3
+    "price": 2500,
+    "ergonomics": 2
   }
   
 ]
