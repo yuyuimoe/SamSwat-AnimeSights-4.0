@@ -8,7 +8,7 @@ using WeebSights.Services;
 
 namespace WeebSights;
 
-[Injectable(TypePriority = OnLoadOrder.PostSptModLoader + 1)]
+[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 1)]
 public class Mod(ISptLogger<Mod> logger,
     WeebItemService weebItemService,
     WeebTraderService weebTraderService,
@@ -18,7 +18,6 @@ public class Mod(ISptLogger<Mod> logger,
     {
         var stopWatch = Stopwatch.StartNew();
         var currentAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        logger.Info($"[Weeb Iron Sights] Loaded in {currentAssemblyPath}");
         if (!weebLocaleService.TryLoadLocales(Path.Join(currentAssemblyPath, "/db/locales/en.json"), out var locales))
         {
             logger.Error("[Weeb Iron Sights] Failed to load locales. Names might be weird");

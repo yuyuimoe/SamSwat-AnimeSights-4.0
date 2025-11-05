@@ -6,7 +6,7 @@ using WeebSights.Models;
 
 namespace WeebSights.Services;
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 4)]
+[Injectable]
 public class WeebLocaleService(JsonUtil jsonUtil)
 {
     public bool TryLoadLocales(string filePath, out Dictionary<MongoId, WeebLocaleConfig> outputObject)
