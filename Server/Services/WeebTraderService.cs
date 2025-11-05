@@ -10,7 +10,7 @@ using SPTarkov.Server.Core.Services;
 
 namespace WeebSights.Services;
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
+[Injectable]
 public class WeebTraderService(ISptLogger<WeebTraderService> logger, DatabaseService databaseService)
 {
     public bool AddToAssortFromItemClone(MongoId traderId, IEnumerable<CreateItemResult> itemCloneResults)
@@ -23,7 +23,7 @@ public class WeebTraderService(ISptLogger<WeebTraderService> logger, DatabaseSer
         
         foreach (var itemResult in itemCloneResults)
         {
-            var item = databaseService.GetItems().FirstOrDefault(i => i.Key ==  itemResult.ItemId);
+            var item = databaseService.GetItems().First(i => i.Key == itemResult.ItemId);
             var traderItem = GenerateItemForTrader(item);
             var traderBarter = new BarterScheme()
             {
@@ -32,11 +32,24 @@ public class WeebTraderService(ISptLogger<WeebTraderService> logger, DatabaseSer
             };
             
             trader.Assort.Items.Add(traderItem);
-            if (!trader.Assort.BarterScheme.TryAdd(item.Key, [[traderBarter]]))
+            if (!trader.Assort.BarterScheme.TryAdd(traderItem.Id, [[traderBarter]]))
             {
-                logger.Error($"[Weeb Iron Sights] Failed to add barter for item {item.Value.Name} with ID {item.Value.Id} in MECHANIC");
+                logger.Error(
+                    $"[Weeb Iron Sights] Failed to add barter {traderItem.Id} for item {item.Value.Name} with ID {item.Value.Id} in {trader.Base.Name}. Item will not be added");
+                trader.Assort.Items.Remove(traderItem);
+                continue;
             }
-            logger.Success($"[Weeb Iron Sights] Added item {item.Value.Name} with ID {item.Value.Id} to MECHANIC");
+
+            if (!trader.Assort.LoyalLevelItems.TryAdd(traderItem.Id, 1))
+            {
+                logger.Critical(
+                    $"[Weeb Iron Sight] Failed to add loyalty requirements for item {item.Value.Name} with ID {item.Value.Id} in {trader.Base.Name}. Item will not be added");
+                trader.Assort.Items.Remove(traderItem);
+                continue;
+            }
+#if DEBUG
+            logger.Success($"[Weeb Iron Sights] Added item {traderItem.Id} with ID {item.Value.Id} and barter {traderItem.Id} to MECHANIC");
+#endif
         }
 
         return true;
@@ -46,7 +59,7 @@ public class WeebTraderService(ISptLogger<WeebTraderService> logger, DatabaseSer
     {
         return new Item
         {
-            Id = databaseItem.Key,
+            Id = new MongoId(),
             Template = databaseItem.Value.Id,
             ParentId = "hideout",
             SlotId = "hideout",
