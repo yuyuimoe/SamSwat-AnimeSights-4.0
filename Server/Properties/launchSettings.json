@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "SPTarkov.Server": {
+      "commandName": "Executable",
+      "executablePath": "$(SPTPath)/SPT.Server.Linux",
+      "commandLineArgs": "--disable-software-rasterizer",
+      "workingDirectory": "$(SPTPath)",
+      "environmentVariables": {
+        
+      }
+    }
+  }
+}
