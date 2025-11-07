@@ -16,5 +16,5 @@ public record ModMetadata : AbstractModMetadata
     public override string? Url { get; init; } = "https://github.com/yuyuimoe/SamSwat-AnimeSights-4.0/";
     public override bool? IsBundleMod { get; init; } = true;
     public override string? License { get; init; } = "MIT";
-    public override string ModGuid { get; init; } = "moe.yuyui.animesights-port";
+    public override string ModGuid { get; init; } = "moe.yuyui.animesightsport";
 }
