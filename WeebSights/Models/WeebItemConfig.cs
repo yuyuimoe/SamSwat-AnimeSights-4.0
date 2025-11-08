@@ -19,4 +19,6 @@ public record WeebItemConfig()
     
     [JsonPropertyName("ergonomics")]
     public int Ergonomics { get; set; }
+    [JsonPropertyName("loot_preset")]
+    public string LootPreset { get; set; }
 }

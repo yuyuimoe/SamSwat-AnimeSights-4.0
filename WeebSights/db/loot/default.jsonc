@@ -1,0 +1,38 @@
+{
+  "name": "Default Loot Preset",
+  "locations": [
+    "factory4_day",
+    "factory4_night",
+    "bigmap",
+    //Customs
+    "woods",
+    "shoreline",
+    "sandbox",
+    //Ground Zero
+    "sandbox_high",
+    //Ground Zero 21+
+    "interchange",
+    "lighthouse",
+    "laboratory",
+    "rezervbase",
+    "tarkovstreets",
+    "labyrinth"
+  ],
+  "containers": {
+    // "CONTAINER_MONGO_ID": PROBABILITY
+    "5909d89086f77472591234a0": 50,
+    // WeaponBox
+    "5909d7cf86f77470ee57d75a": 50,
+    // WeaponBox
+    "5909d76c86f77471e53d2adf": 50,
+    // WeaponBox
+    "5909d5ef86f77467974efbd8": 50,
+    // WeaponBox
+    "5d6d2b5486f774785c2ba8ea": 20,
+    // GroundCache
+    "578f87ad245977356274f2cc": 20,
+    // WoodenCrate
+    "578f87a3245977356274f2cb": 20
+    // duffleBag
+  }
+}
