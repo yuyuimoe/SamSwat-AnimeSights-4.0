@@ -63,15 +63,15 @@ public class WeebLocaleService(
         await Task.Run(() =>
         {
 #if DEBUG
-            var timer = new Stopwatch();
-            timer.Start();
+            var watch = new Stopwatch();
+            watch.Start();
 #endif
             _localesPerLanguage = BuildModLocaleByLanguage();
             _localesPerTemplate = BuildModLocaleByTemplate();
             LazyLoadNewLocales();
 #if DEBUG
-            timer.Stop();
-            Mod.Logger.Info($"[WeebSights] Locale loaded in {timer.ElapsedMilliseconds}ms");
+            watch.Stop();
+            Mod.Logger.Success($"[WeebSights] Locale loaded in {watch.ElapsedMilliseconds}ms");
 #endif
         });
     }

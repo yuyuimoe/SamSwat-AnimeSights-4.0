@@ -42,8 +42,8 @@ public class WeebItemService(
         await Task.Run(async () =>
         {
 #if DEBUG
-            var timer = new Stopwatch();
-            timer.Start();
+            var watch = new Stopwatch();
+            watch.Start();
 #endif
             var config = await jsonUtil.DeserializeFromFileAsync<List<WeebItemConfig>>(
                 Path.Join(Mod.AssemblyLocation, ITEM_LOCATION)
@@ -64,40 +64,10 @@ public class WeebItemService(
                 .ToFrozenDictionary();
 
 #if DEBUG
-            timer.Stop();
-            Mod.Logger.Info($"[WeebSights] Items loaded in {timer.ElapsedMilliseconds}ms");
+            watch.Stop();
+            Mod.Logger.Success($"[WeebSights] Items loaded in {watch.ElapsedMilliseconds}ms");
 #endif
         });
-    }
-
-    private void AddIronSightToFilters(WeebItemConfig sight)
-    {
-        var itemsWithSlots = databaseService
-            .GetTemplates()
-            .Items.Where(i => i.Value.Properties?.Slots?.Count() > 0);
-        foreach (var item in itemsWithSlots)
-        {
-            var backIronSightSlot = item.Value.Properties?.Slots?.FirstOrDefault(s =>
-                s.Name == "mod_sight_rear"
-            );
-            if (backIronSightSlot == null)
-                continue;
-
-            var slotFilter = backIronSightSlot?.Properties?.Filters?.FirstOrDefault(f =>
-                f.Filter?.Contains(sight.CloneFromTpl) ?? false
-            );
-            if (slotFilter == null)
-                continue;
-
-            if (slotFilter.Filter?.Add(sight.Id) is false)
-            {
-                Mod.Logger.Error("[Weeb Iron Sights] Failed to add filter to item " + item.Key);
-                continue;
-            }
-#if DEBUG
-            Mod.Logger.Success($"[Weeb Iron Sights] Added {sight.Id} to filter on item {item.Key}");
-#endif
-        }
     }
 
     public void GenerateItems()
@@ -129,10 +99,7 @@ public class WeebItemService(
                     $"[Weeb Iron Sights] Failed to clone item {item.CloneFromTpl} into {item.Id}"
                 );
                 itemCreation.Errors?.ForEach(e => Mod.Logger.Critical("[Weeb Iron Sights] " + e));
-                continue;
             }
-
-            AddIronSightToFilters(item);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
@@ -13,8 +14,11 @@ using WeebSights.Models;
 namespace WeebSights.Services;
 
 [Injectable(TypePriority = Mod.ModLoadOrder + 4)]
-public class WeebLootService(JsonUtil jsonUtil, DatabaseService databaseService, WeebItemService weebItemService)
-    : IOnLoad
+public class WeebLootService(
+    JsonUtil jsonUtil,
+    DatabaseService databaseService,
+    WeebItemService weebItemService
+) : IOnLoad
 {
     private const string CONFIG_PATH = "/db/loot/default.jsonc";
 
@@ -22,15 +26,26 @@ public class WeebLootService(JsonUtil jsonUtil, DatabaseService databaseService,
     {
         await Task.Run(async () =>
         {
-            var config =
-                await jsonUtil.DeserializeFromFileAsync<WeebLootConfig>(Path.Join(Mod.AssemblyLocation, CONFIG_PATH));
+#if DEBUG
+            var watch = new Stopwatch();
+            watch.Start();
+#endif
+            var config = await jsonUtil.DeserializeFromFileAsync<WeebLootConfig>(
+                Path.Join(Mod.AssemblyLocation, CONFIG_PATH)
+            );
             if (config is null)
             {
-                Mod.Logger.Critical("[Weeb Iron Sights] Failed to load loot tables. Sights won't spawn in raid.");
+                Mod.Logger.Critical(
+                    "[Weeb Iron Sights] Failed to load loot tables. Sights won't spawn in raid."
+                );
                 return;
             }
 
             RegisterStaticLoot(config);
+#if DEBUG
+            watch.Stop();
+            Mod.Logger.Success($"[WeebSights] Loot loaded in {watch.ElapsedMilliseconds}ms");
+#endif
         });
     }
 
@@ -43,18 +58,27 @@ public class WeebLootService(JsonUtil jsonUtil, DatabaseService databaseService,
             var mappedKey = locations.GetMappedKey(location);
             if (mappedKey == location)
             {
-                Mod.Logger.Warning($"[Weeb Iron Sights] Invalid location {location} name on preset {lootConfig.Name}");
+                Mod.Logger.Warning(
+                    $"[Weeb Iron Sights] Invalid location {location} name on preset {lootConfig.Name}"
+                );
                 continue;
             }
 
             if (!locationDict.TryGetValue(mappedKey, out var eftLocation))
             {
-                Mod.Logger.Warning($"[Weeb Iron Sights] Failed to find {location} on eft, on preset {lootConfig.Name}");
+                Mod.Logger.Warning(
+                    $"[Weeb Iron Sights] Failed to find {location} on eft, on preset {lootConfig.Name}"
+                );
                 continue;
             }
 
-            var staticLoot = lootConfig.Containers.Select(c => new ItemDistribution
-                { Tpl = c.Key, RelativeProbability = c.Value }).ToImmutableList();
+            var staticLoot = lootConfig
+                .Containers.Select(c => new ItemDistribution
+                {
+                    Tpl = c.Key,
+                    RelativeProbability = c.Value,
+                })
+                .ToImmutableList();
 
             foreach (var tpl in weebItemService.WeebItems.Keys)
             {
