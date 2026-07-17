@@ -114,6 +114,8 @@ public class WeebLocaleService(
 
                     return localeData;
                 });
+
+                continue;
             }
 
             lazyLoad.AddTransformer(localeData =>
