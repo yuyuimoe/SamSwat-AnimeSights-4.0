@@ -86,6 +86,12 @@ public class WeebLocaleService(
                 continue;
 
             if (!_localesPerLanguage!.TryGetValue(lang, out var locales))
+            {
+#if DEBUG
+                Mod.Logger.Warning(
+                    $"[WeebSights] No locales for language {lang}. Using defaults from parent + english"
+                );
+#endif
                 lazyLoad.AddTransformer(localeData =>
                 {
                     foreach (var (tpl, parentTpl) in weebItemService.WeebItemsCloneFrom)
@@ -94,7 +100,7 @@ public class WeebLocaleService(
                         localeData![$"{tpl} Name"] = string.Join(
                             " ",
                             localeData[$"{parentTpl} Name"],
-                            locale.Name
+                            locale.Suffix
                         );
                         localeData[$"{tpl} Description"] = string.Join(
                             "\n",
@@ -108,6 +114,7 @@ public class WeebLocaleService(
 
                     return localeData;
                 });
+            }
 
             lazyLoad.AddTransformer(localeData =>
             {
@@ -124,7 +131,7 @@ public class WeebLocaleService(
                     localeData![$"{tpl} Name"] = string.Join(
                         " ",
                         localeData[$"{parentTpl} Name"],
-                        locale.Name
+                        locale.Suffix
                     );
                     localeData[$"{tpl} Description"] = string.Join(
                         "\n",
