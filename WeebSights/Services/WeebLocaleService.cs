@@ -14,8 +14,11 @@ using WeebSights.Models;
 namespace WeebSights.Services;
 
 [Injectable(InjectionType.Singleton, TypePriority = Mod.ModLoadOrder + 3)]
-public class WeebLocaleService(JsonUtil jsonUtil, DatabaseService db, WeebItemService weebItemService)
-    : IOnLoad
+public class WeebLocaleService(
+    JsonUtil jsonUtil,
+    DatabaseService db,
+    WeebItemService weebItemService
+) : IOnLoad
 {
     private const string LOCALES_PATH = "db/locales/";
 
@@ -79,7 +82,8 @@ public class WeebLocaleService(JsonUtil jsonUtil, DatabaseService db, WeebItemSe
         var gameLocales = db.GetLocales().Global;
         foreach (var lang in keys)
         {
-            if (!gameLocales.TryGetValue(lang, out var lazyLoad)) continue;
+            if (!gameLocales.TryGetValue(lang, out var lazyLoad))
+                continue;
 
             if (!_localesPerLanguage!.TryGetValue(lang, out var locales))
                 lazyLoad.AddTransformer(localeData =>
@@ -87,9 +91,16 @@ public class WeebLocaleService(JsonUtil jsonUtil, DatabaseService db, WeebItemSe
                     foreach (var (tpl, parentTpl) in weebItemService.WeebItemsCloneFrom)
                     {
                         var locale = _localesPerTemplate![tpl]["en"];
-                        localeData![$"{tpl} Name"] = string.Join(" ", localeData[$"{parentTpl} Name"], locale.Name);
-                        localeData[$"{tpl} Description"] =
-                            string.Join("\n", localeData[$"{parentTpl} Description"], locale.Description);
+                        localeData![$"{tpl} Name"] = string.Join(
+                            " ",
+                            localeData[$"{parentTpl} Name"],
+                            locale.Name
+                        );
+                        localeData[$"{tpl} Description"] = string.Join(
+                            "\n",
+                            localeData[$"{parentTpl} Description"],
+                            locale.Description
+                        );
                         localeData[$"{tpl} ShortName"] = string.IsNullOrWhiteSpace(locale.ShortName)
                             ? localeData[$"{parentTpl} ShortName"]
                             : locale.ShortName;
@@ -98,15 +109,28 @@ public class WeebLocaleService(JsonUtil jsonUtil, DatabaseService db, WeebItemSe
                     return localeData;
                 });
 
-
             lazyLoad.AddTransformer(localeData =>
             {
                 foreach (var (tpl, locale) in locales!)
                 {
-                    var parentTpl = weebItemService.WeebItemsCloneFrom[tpl];
-                    localeData![$"{tpl} Name"] = string.Join(" ", localeData[$"{parentTpl} Name"], locale.Name);
-                    localeData[$"{tpl} Description"] =
-                        string.Join("\n", localeData[$"{parentTpl} Description"], locale.Description);
+                    if (!weebItemService.WeebItemsCloneFrom.TryGetValue(tpl, out var parentTpl))
+                    {
+                        Mod.Logger.Error(
+                            $"[Weeb Sights Port] Failed to find parent clone for {tpl}"
+                        );
+                        continue;
+                    }
+
+                    localeData![$"{tpl} Name"] = string.Join(
+                        " ",
+                        localeData[$"{parentTpl} Name"],
+                        locale.Name
+                    );
+                    localeData[$"{tpl} Description"] = string.Join(
+                        "\n",
+                        localeData[$"{parentTpl} Description"],
+                        locale.Description
+                    );
                     localeData[$"{tpl} ShortName"] = string.IsNullOrWhiteSpace(locale.ShortName)
                         ? localeData[$"{parentTpl} ShortName"]
                         : locale.ShortName;
