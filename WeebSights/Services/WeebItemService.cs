@@ -1,3 +1,6 @@
+using System.Collections.Frozen;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
@@ -8,78 +11,97 @@ using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Services.Mod;
 using SPTarkov.Server.Core.Utils;
 using WeebSights.Models;
+using Path = System.IO.Path;
 
 namespace WeebSights.Services;
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 3)]
-public class WeebItemService(ISptLogger<WeebItemService> logger, JsonUtil jsonUtil, CustomItemService  customItemService, DatabaseService databaseService)
+[Injectable(InjectionType.Singleton, TypePriority = Mod.ModLoadOrder + 1)]
+public class WeebItemService(
+    JsonUtil jsonUtil,
+    CustomItemService customItemService,
+    DatabaseService databaseService
+) : IOnLoad
 {
-    public bool TryLoadConfig(string filePath, out List<WeebItemConfig> outputObject)
+    private const string ITEM_LOCATION = "/db/items.jsonc";
+
+    private FrozenDictionary<MongoId, WeebItemConfig>? _weebItems;
+    private FrozenDictionary<MongoId, MongoId>? _weebItemsCloneFrom;
+
+    public FrozenDictionary<MongoId, MongoId> WeebItemsCloneFrom =>
+        _weebItemsCloneFrom ?? throw new Exception("Items not loaded in");
+
+    public FrozenDictionary<MongoId, WeebItemConfig> WeebItems =>
+        _weebItems ?? throw new Exception("Items not loaded in");
+
+    public async Task OnLoad()
     {
-        var json = LoadConfig(filePath);
-        if (json is null)
+        await Task.Run(async () =>
         {
-            outputObject = [];
-            return false;
-        }
+#if DEBUG
+            var timer = new Stopwatch();
+            timer.Start();
+#endif
+            var config =
+                await jsonUtil.DeserializeFromFileAsync<List<WeebItemConfig>>(Path.Join(Mod.AssemblyLocation,
+                    ITEM_LOCATION));
 
-        outputObject = json;
-        return true;
-    }
-    
-    public List<WeebItemConfig>? LoadConfig(string filePath)
-    {
-        return jsonUtil.DeserializeFromFile<List<WeebItemConfig>>(filePath);
+            if (config is null or { Count: < 1 })
+            {
+                Mod.Logger.Critical("[Weeb Item Sights] Failed to load items.");
+                return;
+            }
+
+            _weebItems = config.ToFrozenDictionary(x => x.Id);
+            _weebItemsCloneFrom = config.ToFrozenDictionary(x => x.Id, x => x.CloneFromTpl);
+
+#if DEBUG
+            timer.Stop();
+            Mod.Logger.Info($"[WeebSights] Items loaded in {timer.ElapsedMilliseconds}ms");
+#endif
+        });
     }
 
-    public void AddIronSightToFilters(WeebItemConfig sight)
+    private void AddIronSightToFilters(WeebItemConfig sight)
     {
-        var itemsWithSlots = databaseService.GetTemplates().Items.Where(i => i.Value.Properties?.Slots?.Count() > 0);
+        var itemsWithSlots = databaseService
+            .GetTemplates()
+            .Items
+            .Where(i => i.Value.Properties?.Slots?.Count() > 0);
         foreach (var item in itemsWithSlots)
         {
-            var backIronSightSlot = item.Value.Properties?.Slots?.FirstOrDefault(s => s.Name == "mod_sight_rear");
+            var backIronSightSlot = item.Value.Properties?.Slots?.FirstOrDefault(s =>
+                s.Name == "mod_sight_rear"
+            );
             if (backIronSightSlot == null)
-            {
                 continue;
-            }
 
-            var slotFilter = backIronSightSlot?.Properties?.Filters?.FirstOrDefault(f => f.Filter?.Contains(sight.CloneFromTpl) ?? false);
+            var slotFilter = backIronSightSlot?.Properties?.Filters?.FirstOrDefault(f =>
+                f.Filter?.Contains(sight.CloneFromTpl) ?? false
+            );
             if (slotFilter == null)
-            {
                 continue;
-            }
 
             if (slotFilter.Filter?.Add(sight.Id) is false)
             {
-                logger.Error("[Weeb Iron Sights] Failed to add filter to item " + item.Key);
+                Mod.Logger.Error("[Weeb Iron Sights] Failed to add filter to item " + item.Key);
                 continue;
-            } 
+            }
 #if DEBUG
-            logger.Success($"[Weeb Iron Sights] Added {sight.Id} to filter on item {item.Key}");
+            Mod.Logger.Success($"[Weeb Iron Sights] Added {sight.Id} to filter on item {item.Key}");
 #endif
         }
     }
-    
-    public IEnumerable<CreateItemResult> GenerateItems(List<WeebItemConfig> items, Dictionary<MongoId, WeebLocaleConfig> locales)
+
+    public IEnumerable<CreateItemResult> GenerateItems(ImmutableList<WeebItemConfig> items)
     {
         if (items.Count == 0)
-        {
             yield break;
-        }
+
+        var langs = databaseService.GetLocales().Languages.Keys.ToHashSet();
+        var cloneTpls = items.Select(x => x.CloneFromTpl).ToImmutableHashSet();
 
         foreach (var item in items)
         {
-            if (!locales.TryGetValue(item.Id, out var localeConfig))
-            {
-                logger.Error($"[Weeb Iron Sights] Failed to load locale for {item.Id}, using IDs for name");
-                localeConfig = new WeebLocaleConfig()
-                {
-                    Name = item.Id,
-                    Description = "FAILED TO LOAD LOCALES",
-                    ShortName = "WEEBSIGHT",
-                };
-            }
-            
             NewItemFromCloneDetails clonedItem = new()
             {
                 NewId = item.Id,
@@ -87,37 +109,26 @@ public class WeebItemService(ISptLogger<WeebItemService> logger, JsonUtil jsonUt
                 ParentId = "55818ac54bdc2d5b648b456e", // Ironsight
                 HandbookParentId = "5b5f746686f77447ec5d7708", // CATEGORY
                 HandbookPriceRoubles = item.Price,
-                OverrideProperties = new TemplateItemProperties()
+                OverrideProperties = new TemplateItemProperties
                 {
                     Ergonomics = item.Ergonomics,
                     CreditsPrice = item.Price,
-                    Prefab = new Prefab()
-                    {
-                        Path = item.BundlePath
-                    },
+                    Prefab = new Prefab { Path = item.BundlePath }
                 },
-                Locales = new Dictionary<string, LocaleDetails>
-                {
-                    {
-                        "en", new LocaleDetails()
-                        {
-                            Name = localeConfig.Name,
-                            ShortName = localeConfig.ShortName,
-                            Description = localeConfig.Description,
-                        }
-                    }
-                }
+                Locales = new Dictionary<string, LocaleDetails>()
             };
             var itemCreation = customItemService.CreateItemFromClone(clonedItem);
             if (itemCreation.Success is false or null)
             {
-                logger.Error($"[Weeb Iron Sights] Failed to clone item {item.CloneFromTpl} into {item.Id}");
-                itemCreation.Errors?.ForEach(e => logger.Critical("[Weeb Iron Sights] " + e));
+                Mod.Logger.Error(
+                    $"[Weeb Iron Sights] Failed to clone item {item.CloneFromTpl} into {item.Id}"
+                );
+                itemCreation.Errors?.ForEach(e => Mod.Logger.Critical("[Weeb Iron Sights] " + e));
                 continue;
             }
 
             AddIronSightToFilters(item);
             yield return itemCreation;
-        } 
+        }
     }
 }

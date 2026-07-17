@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Extensions;
@@ -10,63 +11,70 @@ using SPTarkov.Server.Core.Services;
 
 namespace WeebSights.Services;
 
-[Injectable]
-public class WeebTraderService(ISptLogger<WeebTraderService> logger, DatabaseService databaseService)
+[Injectable(TypePriority = Mod.ModLoadOrder + 5)]
+public class WeebTraderService(DatabaseService databaseService, WeebItemService weebItemService) : IOnLoad
 {
-    public bool AddToAssortFromItemClone(MongoId traderId, IEnumerable<CreateItemResult> itemCloneResults)
+    private static MongoId[] TRADERS = [Traders.MECHANIC];
+
+
+    public async Task OnLoad()
     {
-        if (!databaseService.GetTables().Traders.TryGetValue(traderId, out var trader))
-        {
-            logger.Error($"[Weeb Iron Sights] Failed to find trader with ID {traderId}");
-            return false;
-        }
-        
-        foreach (var itemResult in itemCloneResults)
-        {
-            var item = databaseService.GetItems().First(i => i.Key == itemResult.ItemId);
-            var traderItem = GenerateItemForTrader(item);
-            var traderBarter = new BarterScheme()
-            {
-                Count = item.Value.Properties?.CreditsPrice ?? 1,
-                Template = CurrencyType.RUB.GetCurrencyTpl()
-            };
-            
-            trader.Assort.Items.Add(traderItem);
-            if (!trader.Assort.BarterScheme.TryAdd(traderItem.Id, [[traderBarter]]))
-            {
-                logger.Error(
-                    $"[Weeb Iron Sights] Failed to add barter {traderItem.Id} for item {item.Value.Name} with ID {item.Value.Id} in {trader.Base.Name}. Item will not be added");
-                trader.Assort.Items.Remove(traderItem);
-                continue;
-            }
-
-            if (!trader.Assort.LoyalLevelItems.TryAdd(traderItem.Id, 1))
-            {
-                logger.Critical(
-                    $"[Weeb Iron Sight] Failed to add loyalty requirements for item {item.Value.Name} with ID {item.Value.Id} in {trader.Base.Name}. Item will not be added");
-                trader.Assort.Items.Remove(traderItem);
-                continue;
-            }
-#if DEBUG
-            logger.Success($"[Weeb Iron Sights] Added item {traderItem.Id} with ID {item.Value.Id} and barter {traderItem.Id} to MECHANIC");
-#endif
-        }
-
-        return true;
+        Task.Run(GenerateItemsAssorts);
     }
 
-    private Item GenerateItemForTrader(KeyValuePair<MongoId, TemplateItem> databaseItem)
+    public void GenerateItemsAssorts()
+    {
+        var dbTraders = databaseService.GetTraders()
+            .Where(x => TRADERS.Contains(x.Key))
+            .ToFrozenDictionary();
+        var dbItems = databaseService.GetItems()
+            .Where(x => weebItemService.WeebItems.ContainsKey(x.Key))
+            .ToFrozenDictionary();
+
+        foreach (var (traderId, trader) in dbTraders)
+        foreach (var (tpl, item) in dbItems)
+        {
+            var traderAssort = GenerateItemForTrader(tpl);
+            var traderBarter = new BarterScheme
+            {
+                Count = item.Properties?.CreditsPrice ?? 7896,
+                Template = ItemTpl.MONEY_ROUBLES
+            };
+            trader.Assort.Items.Add(traderAssort);
+            if (!trader.Assort.BarterScheme.TryAdd(traderAssort.Id, [[traderBarter]]))
+            {
+                Mod.Logger.Error(
+                    $"[Weeb Iron Sights] Failed to add assort for item {tpl} on trader {trader.Base.Nickname ?? traderId}");
+                trader.Assort.Items.Remove(traderAssort);
+                continue;
+            }
+
+            if (!trader.Assort.LoyalLevelItems.TryAdd(traderAssort.Id, 1))
+            {
+                Mod.Logger.Error(
+                    $"[Weeb Iron Sights] Failed to add LL for item {tpl} on trader {trader.Base.Nickname ?? traderId}");
+                trader.Assort.BarterScheme.Remove(traderAssort.Id);
+                trader.Assort.Items.Remove(traderAssort);
+            }
+#if DEBUG
+            Mod.Logger.Success(
+                $"[Weeb Iron Sights] Added assort {traderAssort.Id} with template {tpl} to {trader.Base.Nickname ?? traderId}");
+#endif
+        }
+    }
+
+    private Item GenerateItemForTrader(MongoId tpl)
     {
         return new Item
         {
             Id = new MongoId(),
-            Template = databaseItem.Value.Id,
+            Template = tpl,
             ParentId = "hideout",
             SlotId = "hideout",
-            Upd = new Upd()
+            Upd = new Upd
             {
                 UnlimitedCount = true,
-                StackObjectsCount = 99999,
+                StackObjectsCount = 99999
             }
         };
     }

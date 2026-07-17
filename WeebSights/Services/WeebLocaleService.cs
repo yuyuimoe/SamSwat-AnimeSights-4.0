@@ -1,29 +1,142 @@
+using System.Collections.Frozen;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Spt.Server;
+using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
+using SPTarkov.Server.Core.Utils.Json;
 using WeebSights.Models;
 
 namespace WeebSights.Services;
 
-[Injectable]
-public class WeebLocaleService(JsonUtil jsonUtil)
+[Injectable(InjectionType.Singleton, TypePriority = Mod.ModLoadOrder + 3)]
+public class WeebLocaleService(JsonUtil jsonUtil, DatabaseService db, WeebItemService weebItemService)
+    : IOnLoad
 {
-    public bool TryLoadLocales(string filePath, out Dictionary<MongoId, WeebLocaleConfig> outputObject)
-    {
-        var json = LoadLocales(filePath);
-        if (json == null)
-        {
-            outputObject = new Dictionary<MongoId, WeebLocaleConfig>();
-            return false;
-        }
+    private const string LOCALES_PATH = "db/locales/";
 
-        outputObject = json;
-        return true;
-    }
-    
-    public Dictionary<MongoId, WeebLocaleConfig>? LoadLocales(string filePath)
+    private FrozenDictionary<
+        string,
+        FrozenDictionary<MongoId, WeebLocaleConfig>
+    >? _localesPerLanguage;
+
+    private FrozenDictionary<
+        MongoId,
+        FrozenDictionary<string, WeebLocaleConfig>
+    >? _localesPerTemplate;
+
+    private FrozenDictionary<
+        MongoId,
+        FrozenDictionary<string, WeebLocaleConfig>
+    >? _builtLocalesByTemplate;
+
+    public FrozenDictionary<
+        string,
+        FrozenDictionary<MongoId, WeebLocaleConfig>
+    > LocalesPerLanguage => _localesPerLanguage ?? throw new Exception("Locales not loaded yet");
+
+    public FrozenDictionary<
+        MongoId,
+        FrozenDictionary<string, WeebLocaleConfig>
+    > LocalesPerTemplate => _localesPerTemplate ?? throw new Exception("Locales not loaded yet");
+
+    public FrozenDictionary<
+        MongoId,
+        FrozenDictionary<string, WeebLocaleConfig>
+    > BuiltLocalesByTemplate =>
+        _builtLocalesByTemplate ?? throw new Exception("Locales not loaded yet");
+
+    private Dictionary<MongoId, WeebLocaleConfig>? LoadLocales(string filePath)
     {
         return jsonUtil.DeserializeFromFile<Dictionary<MongoId, WeebLocaleConfig>>(filePath);
+    }
+
+    public async Task OnLoad()
+    {
+        await Task.Run(() =>
+        {
+#if DEBUG
+            var timer = new Stopwatch();
+            timer.Start();
+#endif
+            _localesPerLanguage = BuildModLocaleByLanguage();
+            _localesPerTemplate = BuildModLocaleByTemplate();
+            LazyLoadNewLocales();
+#if DEBUG
+            timer.Stop();
+            Mod.Logger.Info($"[WeebSights] Locale loaded in {timer.ElapsedMilliseconds}ms");
+#endif
+        });
+    }
+
+    private void LazyLoadNewLocales()
+    {
+        var keys = db.GetLocales().Languages.Keys;
+        var gameLocales = db.GetLocales().Global;
+        foreach (var lang in keys)
+        {
+            if (!gameLocales.TryGetValue(lang, out var lazyLoad)) continue;
+
+            if (!_localesPerLanguage!.TryGetValue(lang, out var locales))
+                lazyLoad.AddTransformer(localeData =>
+                {
+                    foreach (var (tpl, parentTpl) in weebItemService.WeebItemsCloneFrom)
+                    {
+                        var locale = _localesPerTemplate![tpl]["en"];
+                        localeData![$"{tpl} Name"] = string.Join(" ", localeData[$"{parentTpl} Name"], locale.Name);
+                        localeData[$"{tpl} Description"] =
+                            string.Join("\n", localeData[$"{parentTpl} Description"], locale.Description);
+                        localeData[$"{tpl} ShortName"] = string.IsNullOrWhiteSpace(locale.ShortName)
+                            ? localeData[$"{parentTpl} ShortName"]
+                            : locale.ShortName;
+                    }
+
+                    return localeData;
+                });
+
+
+            lazyLoad.AddTransformer(localeData =>
+            {
+                foreach (var (tpl, locale) in locales!)
+                {
+                    var parentTpl = weebItemService.WeebItemsCloneFrom[tpl];
+                    localeData![$"{tpl} Name"] = string.Join(" ", localeData[$"{parentTpl} Name"], locale.Name);
+                    localeData[$"{tpl} Description"] =
+                        string.Join("\n", localeData[$"{parentTpl} Description"], locale.Description);
+                    localeData[$"{tpl} ShortName"] = string.IsNullOrWhiteSpace(locale.ShortName)
+                        ? localeData[$"{parentTpl} ShortName"]
+                        : locale.ShortName;
+                }
+
+                return localeData;
+            });
+        }
+    }
+
+    private FrozenDictionary<
+        string,
+        FrozenDictionary<MongoId, WeebLocaleConfig>
+    > BuildModLocaleByLanguage()
+    {
+        return Directory
+            .EnumerateFiles(Path.Join(Mod.AssemblyLocation, LOCALES_PATH), "*.json")
+            .Select(f => (lang: Path.GetFileNameWithoutExtension(f), locale: LoadLocales(f)))
+            .Where(x => x.locale is not null)
+            .ToFrozenDictionary(x => x.lang, x => x.locale!.ToFrozenDictionary());
+    }
+
+    private FrozenDictionary<
+        MongoId,
+        FrozenDictionary<string, WeebLocaleConfig>
+    > BuildModLocaleByTemplate()
+    {
+        return _localesPerLanguage!
+            .SelectMany(ll => ll.Value.Select(wlc => (tpl: wlc.Key, lo: wlc.Value, la: ll.Key)))
+            .GroupBy(x => x.tpl)
+            .ToFrozenDictionary(g => g.Key, g => g.ToFrozenDictionary(k => k.la, k => k.lo));
     }
 }
