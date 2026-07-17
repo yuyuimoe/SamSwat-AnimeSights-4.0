@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Diagnostics;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
@@ -19,12 +20,20 @@ public class WeebTraderService(DatabaseService databaseService, WeebItemService 
     {
         await Task.Run(() =>
         {
+#if DEBUG
+            var watch = new Stopwatch();
+            watch.Start();
+#endif
             _allowedTradersInstances = databaseService
                 .GetTraders()
                 .Where(x => AllowedTraders.Contains(x.Key))
                 .ToFrozenDictionary();
 
             GenerateItemsAssorts();
+#if DEBUG
+            watch.Stop();
+            Mod.Logger.Success($"[WeebSights] Trader loaded in {watch.ElapsedMilliseconds}ms");
+#endif
         });
     }
 
