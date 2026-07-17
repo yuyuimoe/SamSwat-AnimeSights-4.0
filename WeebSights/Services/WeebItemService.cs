@@ -26,12 +26,16 @@ public class WeebItemService(
 
     private FrozenDictionary<MongoId, WeebItemConfig>? _weebItems;
     private FrozenDictionary<MongoId, MongoId>? _weebItemsCloneFrom;
+    private FrozenDictionary<MongoId, TemplateItem>? _weebItemTemplate;
 
     public FrozenDictionary<MongoId, MongoId> WeebItemsCloneFrom =>
         _weebItemsCloneFrom ?? throw new Exception("Items not loaded in");
 
     public FrozenDictionary<MongoId, WeebItemConfig> WeebItems =>
         _weebItems ?? throw new Exception("Items not loaded in");
+
+    public FrozenDictionary<MongoId, TemplateItem> WeebItemTemplate =>
+        _weebItemTemplate ?? throw new Exception("Items not loaded in");
 
     public async Task OnLoad()
     {
@@ -41,9 +45,9 @@ public class WeebItemService(
             var timer = new Stopwatch();
             timer.Start();
 #endif
-            var config =
-                await jsonUtil.DeserializeFromFileAsync<List<WeebItemConfig>>(Path.Join(Mod.AssemblyLocation,
-                    ITEM_LOCATION));
+            var config = await jsonUtil.DeserializeFromFileAsync<List<WeebItemConfig>>(
+                Path.Join(Mod.AssemblyLocation, ITEM_LOCATION)
+            );
 
             if (config is null or { Count: < 1 })
             {
@@ -53,6 +57,11 @@ public class WeebItemService(
 
             _weebItems = config.ToFrozenDictionary(x => x.Id);
             _weebItemsCloneFrom = config.ToFrozenDictionary(x => x.Id, x => x.CloneFromTpl);
+            GenerateItems();
+            _weebItemTemplate = databaseService
+                .GetItems()
+                .Where(x => _weebItems.ContainsKey(x.Key))
+                .ToFrozenDictionary();
 
 #if DEBUG
             timer.Stop();
@@ -65,8 +74,7 @@ public class WeebItemService(
     {
         var itemsWithSlots = databaseService
             .GetTemplates()
-            .Items
-            .Where(i => i.Value.Properties?.Slots?.Count() > 0);
+            .Items.Where(i => i.Value.Properties?.Slots?.Count() > 0);
         foreach (var item in itemsWithSlots)
         {
             var backIronSightSlot = item.Value.Properties?.Slots?.FirstOrDefault(s =>
@@ -92,19 +100,16 @@ public class WeebItemService(
         }
     }
 
-    public IEnumerable<CreateItemResult> GenerateItems(ImmutableList<WeebItemConfig> items)
+    public void GenerateItems()
     {
-        if (items.Count == 0)
-            yield break;
+        if (_weebItems?.Count == 0)
+            return;
 
-        var langs = databaseService.GetLocales().Languages.Keys.ToHashSet();
-        var cloneTpls = items.Select(x => x.CloneFromTpl).ToImmutableHashSet();
-
-        foreach (var item in items)
+        foreach (var (tpl, item) in _weebItems!)
         {
             NewItemFromCloneDetails clonedItem = new()
             {
-                NewId = item.Id,
+                NewId = tpl,
                 ItemTplToClone = item.CloneFromTpl,
                 ParentId = "55818ac54bdc2d5b648b456e", // Ironsight
                 HandbookParentId = "5b5f746686f77447ec5d7708", // CATEGORY
@@ -113,9 +118,9 @@ public class WeebItemService(
                 {
                     Ergonomics = item.Ergonomics,
                     CreditsPrice = item.Price,
-                    Prefab = new Prefab { Path = item.BundlePath }
+                    Prefab = new Prefab { Path = item.BundlePath },
                 },
-                Locales = new Dictionary<string, LocaleDetails>()
+                Locales = new Dictionary<string, LocaleDetails>(), //Handled by WeebLocaleService
             };
             var itemCreation = customItemService.CreateItemFromClone(clonedItem);
             if (itemCreation.Success is false or null)
@@ -128,7 +133,6 @@ public class WeebItemService(
             }
 
             AddIronSightToFilters(item);
-            yield return itemCreation;
         }
     }
 }
