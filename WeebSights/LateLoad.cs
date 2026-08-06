@@ -1,15 +1,17 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 using SPTarkov.Server.Core.Services;
 using WeebSights.Services;
 
 namespace WeebSights;
 
 [Injectable]
-public class LateLoad(DatabaseService databaseService, WeebItemService weebItemService) : IOnLoad
+public class LateLoad(TemplateTable templates, WeebItemService weebItemService) : IOnLoad
 {
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken ct)
     {
         await Task.Run(() =>
         {
@@ -29,11 +31,11 @@ public class LateLoad(DatabaseService databaseService, WeebItemService weebItemS
 
     private void AddIronSightToFilters()
     {
-        var slots = databaseService
-            .GetTemplates()
+        var slots = templates
             .Items.Where(i => i.Value.Properties?.Slots?.Count() > 0)
             .Select(i => i.Value.Properties?.Slots?.FirstOrDefault(s => s.Name == "mod_sight_rear"))
-            .Where(x => x is not null);
+            .Where(x => x is not null)
+            .ToImmutableList();
 
         foreach (var (tpl, parent) in weebItemService.WeebItemsCloneFrom)
         {
