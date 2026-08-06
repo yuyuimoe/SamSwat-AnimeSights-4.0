@@ -5,36 +5,37 @@ using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 
 namespace WeebSights.Services;
 
 [Injectable(TypePriority = Mod.ModLoadOrder + 5)]
-public class WeebTraderService(DatabaseService databaseService, WeebItemService weebItemService)
-    : IOnLoad
+public class WeebTraderService(TradersTable tradersTable, WeebItemService weebItemService) : IOnLoad
 {
     private static readonly MongoId[] AllowedTraders = [Traders.MECHANIC];
     private FrozenDictionary<MongoId, Trader>? _allowedTradersInstances;
 
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken ct)
     {
-        await Task.Run(() =>
-        {
+        await Task.Run(
+            () =>
+            {
 #if DEBUG
-            var watch = new Stopwatch();
-            watch.Start();
+                var watch = new Stopwatch();
+                watch.Start();
 #endif
-            _allowedTradersInstances = databaseService
-                .GetTraders()
-                .Where(x => AllowedTraders.Contains(x.Key))
-                .ToFrozenDictionary();
+                _allowedTradersInstances = tradersTable
+                    .Where(x => AllowedTraders.Contains(x.Key))
+                    .ToFrozenDictionary();
 
-            GenerateItemsAssorts();
+                GenerateItemsAssorts();
 #if DEBUG
-            watch.Stop();
-            Mod.Logger.Success($"[WeebSights] Trader loaded in {watch.ElapsedMilliseconds}ms");
+                watch.Stop();
+                Mod.Logger.Success($"[WeebSights] Trader loaded in {watch.ElapsedMilliseconds}ms");
 #endif
-        });
+            },
+            ct
+        );
     }
 
     private void GenerateItemsAssorts()
