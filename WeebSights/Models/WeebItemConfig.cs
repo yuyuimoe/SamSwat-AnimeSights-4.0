@@ -7,18 +7,22 @@ public record WeebItemConfig()
 {
     [JsonPropertyName("id")]
     public MongoId Id { get; set; }
-    
+
     [JsonPropertyName("clone_from_tpl")]
     public MongoId CloneFromTpl { get; set; }
-    
+
     [JsonPropertyName("bundle_path")]
     public string BundlePath { get; set; }
-    
+
+    [JsonPropertyName("item_name")]
+    public string ItemName { get; set; }
+
     [JsonPropertyName("price")]
     public int Price { get; set; }
-    
+
     [JsonPropertyName("ergonomics")]
     public int Ergonomics { get; set; }
+
     [JsonPropertyName("loot_preset")]
     public string LootPreset { get; set; }
 }
