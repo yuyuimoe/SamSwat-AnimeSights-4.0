@@ -5,7 +5,7 @@ using System.Reflection.Metadata.Ecma335;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
-using SPTarkov.Server.Core.Models.Spt.Server;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Json;
@@ -16,7 +16,7 @@ namespace WeebSights.Services;
 [Injectable(InjectionType.Singleton, TypePriority = Mod.ModLoadOrder + 3)]
 public class WeebLocaleService(
     JsonUtil jsonUtil,
-    DatabaseService db,
+    LocaleTable localeTable,
     WeebItemService weebItemService
 ) : IOnLoad
 {
@@ -58,28 +58,31 @@ public class WeebLocaleService(
         return jsonUtil.DeserializeFromFile<Dictionary<MongoId, WeebLocaleConfig>>(filePath);
     }
 
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken ct)
     {
-        await Task.Run(() =>
-        {
+        await Task.Run(
+            () =>
+            {
 #if DEBUG
-            var watch = new Stopwatch();
-            watch.Start();
+                var watch = new Stopwatch();
+                watch.Start();
 #endif
-            _localesPerLanguage = BuildModLocaleByLanguage();
-            _localesPerTemplate = BuildModLocaleByTemplate();
-            LazyLoadNewLocales();
+                _localesPerLanguage = BuildModLocaleByLanguage();
+                _localesPerTemplate = BuildModLocaleByTemplate();
+                LazyLoadNewLocales();
 #if DEBUG
-            watch.Stop();
-            Mod.Logger.Success($"[WeebSights] Locale loaded in {watch.ElapsedMilliseconds}ms");
+                watch.Stop();
+                Mod.Logger.Success($"[WeebSights] Locale loaded in {watch.ElapsedMilliseconds}ms");
 #endif
-        });
+            },
+            ct
+        );
     }
 
     private void LazyLoadNewLocales()
     {
-        var keys = db.GetLocales().Languages.Keys;
-        var gameLocales = db.GetLocales().Global;
+        var keys = localeTable.Languages.Keys;
+        var gameLocales = localeTable.Global;
         foreach (var lang in keys)
         {
             if (!gameLocales.TryGetValue(lang, out var lazyLoad))
