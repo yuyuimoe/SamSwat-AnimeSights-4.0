@@ -2,6 +2,6 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <!-- Set YOUR OWN path to SPT server directory here -->
-        <SPTPath>/home/yui/Games/spt40/drive_c/Program Files/tarkov_dev/weeb-sights/SPT/</SPTPath>
+        <SPTPath>/home/yui/Games/spt40/drive_c/Program Files/tarkov_dev/spt41/SPT_Runtime/</SPTPath>
     </PropertyGroup>
 </Project>
