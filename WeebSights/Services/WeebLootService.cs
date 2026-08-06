@@ -6,6 +6,7 @@ using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
@@ -16,46 +17,50 @@ namespace WeebSights.Services;
 [Injectable(TypePriority = Mod.ModLoadOrder + 4)]
 public class WeebLootService(
     JsonUtil jsonUtil,
-    DatabaseService databaseService,
+    LocationTable locationTable,
     WeebItemService weebItemService
 ) : IOnLoad
 {
     private const string CONFIG_PATH = "/db/loot/default.jsonc";
 
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken ct)
     {
-        await Task.Run(async () =>
-        {
-#if DEBUG
-            var watch = new Stopwatch();
-            watch.Start();
-#endif
-            var config = await jsonUtil.DeserializeFromFileAsync<WeebLootConfig>(
-                Path.Join(Mod.AssemblyLocation, CONFIG_PATH)
-            );
-            if (config is null)
+        await Task.Run(
+            async () =>
             {
-                Mod.Logger.Critical(
-                    "[Weeb Iron Sights] Failed to load loot tables. Sights won't spawn in raid."
-                );
-                return;
-            }
-
-            RegisterStaticLoot(config);
 #if DEBUG
-            watch.Stop();
-            Mod.Logger.Success($"[WeebSights] Loot loaded in {watch.ElapsedMilliseconds}ms");
+                var watch = new Stopwatch();
+                watch.Start();
 #endif
-        });
+                var config = await jsonUtil.DeserializeFromFileAsync<WeebLootConfig>(
+                    Path.Join(Mod.AssemblyLocation, CONFIG_PATH),
+                    ct
+                );
+                if (config is null)
+                {
+                    Mod.Logger.Critical(
+                        "[Weeb Iron Sights] Failed to load loot tables. Sights won't spawn in raid."
+                    );
+                    return;
+                }
+
+                RegisterStaticLoot(config);
+#if DEBUG
+                watch.Stop();
+                Mod.Logger.Success($"[WeebSights] Loot loaded in {watch.ElapsedMilliseconds}ms");
+#endif
+            },
+            ct
+        );
     }
 
     private void RegisterStaticLoot(WeebLootConfig lootConfig)
     {
-        var locations = databaseService.GetTables().Locations;
-        var locationDict = locations.GetDictionary().ToFrozenDictionary();
+        var locations = locationTable.Base.Locations;
+        var locationDict = locationTable.GetDictionary().ToFrozenDictionary();
         foreach (var location in lootConfig.Locations)
         {
-            var mappedKey = locations.GetMappedKey(location);
+            var mappedKey = locationTable.GetMappedKey(location);
             if (mappedKey == location)
             {
                 Mod.Logger.Warning(
