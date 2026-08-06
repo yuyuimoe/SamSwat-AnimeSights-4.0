@@ -18,6 +18,6 @@ public record ModMetadata : IModMetadata
     public string? Url { get; init; } = "https://github.com/yuyuimoe/SamSwat-AnimeSights-4.0/";
 
     public bool? IsBundleMod { get; init; } = true;
-    public string? License { get; init; } = "MIT";
+    public string License { get; init; } = "MIT";
     public string ModGuid { get; init; } = "moe.yuyui.animesightsport";
 }

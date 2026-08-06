@@ -3,7 +3,7 @@ using SPTarkov.Server.Core.Models.Common;
 
 namespace WeebSights.Models;
 
-public record WeebItemConfig()
+public record WeebItemConfig
 {
     [JsonPropertyName("id")]
     public MongoId Id { get; set; }

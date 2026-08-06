@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace WeebSights.Models;
 
-public record WeebLocaleConfig()
+public record WeebLocaleConfig
 {
     [JsonPropertyName("suffix")]
     public string Suffix { get; set; }

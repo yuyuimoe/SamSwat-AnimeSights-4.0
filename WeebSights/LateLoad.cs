@@ -3,7 +3,6 @@ using System.Diagnostics;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Spt.Tables;
-using SPTarkov.Server.Core.Services;
 using WeebSights.Services;
 
 namespace WeebSights;
@@ -13,20 +12,25 @@ public class LateLoad(TemplateTable templates, WeebItemService weebItemService) 
 {
     public async Task OnLoadAsync(CancellationToken ct)
     {
-        await Task.Run(() =>
-        {
+        await Task.Run(
+            () =>
+            {
 #if DEBUG
-            var watch = new Stopwatch();
-            watch.Start();
+                var watch = new Stopwatch();
+                watch.Start();
 #endif
 
-            AddIronSightToFilters();
+                AddIronSightToFilters();
 
 #if DEBUG
-            watch.Stop();
-            Mod.Logger.Success($"[WeebSights] Loaded late load in {watch.ElapsedMilliseconds}ms");
+                watch.Stop();
+                Mod.Logger.Success(
+                    $"[WeebSights] Loaded late load in {watch.ElapsedMilliseconds}ms"
+                );
 #endif
-        });
+            },
+            ct
+        );
     }
 
     private void AddIronSightToFilters()
