@@ -101,6 +101,7 @@ public class WeebItemService(
                 ParentId = "55818ac54bdc2d5b648b456e", // Ironsight
                 HandbookParentId = "5b5f746686f77447ec5d7708", // CATEGORY
                 HandbookPriceRoubles = item.Price,
+                FleaPriceRoubles = item.Price,
                 OverrideProperties = new TemplateItemProperties
                 {
                     Ergonomics = item.Ergonomics,
