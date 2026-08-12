@@ -11,7 +11,7 @@ public class Mod(ISptLogger<Mod> logger) : IOnLoad
     public static string AssemblyLocation { get; private set; } =
         Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 
-    public const int ModLoadOrder = OnLoadOrder.PostLoad + 65535;
+    public const int ModLoadOrder = OnLoadOrder.Preload + 65535;
 
     public static ISptLogger<Mod> Logger { get; private set; }
 
