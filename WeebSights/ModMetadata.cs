@@ -7,7 +7,7 @@ public record ModMetadata : IModMetadata
     public string Name { get; init; } = "Weeb Iron Sights";
     public string Author { get; init; } = "yuyui.moe";
     public List<string>? Contributors { get; init; } = ["SamSWAT"];
-    public SemanticVersioning.Version Version { get; init; } = new("1.4.0");
+    public SemanticVersioning.Version Version { get; init; } = new("1.4.1");
     public SemanticVersioning.Range SptVersion { get; init; } = new("~4.1.0");
     public bool HasPrepatcher { get; init; } = false;
 
