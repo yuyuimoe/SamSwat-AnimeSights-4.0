@@ -3,11 +3,10 @@
   "profiles": {
     "SPTarkov.Server": {
       "commandName": "Executable",
-      "executablePath": "$(SPTPath)/SPT.Server.Linux",
+      "executablePath": "$(SPTPath)SPT.Server.Linux",
       "commandLineArgs": "--disable-software-rasterizer",
       "workingDirectory": "$(SPTPath)",
       "environmentVariables": {
-        
       }
     }
   }
